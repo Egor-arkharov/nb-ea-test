@@ -59,6 +59,10 @@
 		text-transform: uppercase;
 		background-color: #393839;
 
+		@include hover {
+			background-color: darken(#393839, 5%);
+		}
+
 		&.active {
 			background-color: #242223;
 		}
@@ -77,7 +81,7 @@
 		position: relative;
 
 		@include hover {
-			background-color: lighten(#242223, 15%);
+			background-color: lighten(#242223, 5%);
 		}
 
 
