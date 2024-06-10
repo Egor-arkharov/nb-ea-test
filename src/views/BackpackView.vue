@@ -1,29 +1,42 @@
 <template>
   <div class="backpack">
     <div class="backpack__filters">
-      <BackpackFilters />
+      <BackpackFilters @filter-selected="updateSelectedFilter" />
     </div>
     <div class="backpack__labels">
-      <BackpackLabels />
+      <BackpackLabels :selected-filter="selectedFilter" />
     </div>
     <div class="backpack__items">
-      <BackpackItems />
+      <BackpackItems :selected-filter="selectedFilter" />
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import BackpackFilters from "@/components/Backpack/BackpackFilters";
-import BackpackLabels from "@/components/Backpack/BackpackLabels";
-import BackpackItems from "@/components/Backpack/BackpackItems";
+<script>
+import BackpackFilters from "../components/Backpack/BackpackFilters.vue";
+import BackpackLabels from "../components/Backpack/BackpackLabels.vue";
+import BackpackItems from "../components/Backpack/BackpackItems.vue";
+import { ref } from 'vue';
 
 export default {
+  
   components: {
     BackpackFilters,
     BackpackLabels,
     BackpackItems
   },
-  setup() {},
+  setup() {
+    const selectedFilter = ref('all');
+
+    const updateSelectedFilter = (filterName) => {
+      selectedFilter.value = filterName;
+    };
+
+    return {
+      updateSelectedFilter,
+      selectedFilter
+    }
+  },
 };
 </script>
 

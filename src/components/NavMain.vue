@@ -58,6 +58,7 @@
 		color: $white-color;
 		text-transform: uppercase;
 		background-color: #393839;
+		transition: all 0.2s ease-in-out;
 
 		@include hover {
 			background-color: darken(#393839, 5%);
@@ -79,6 +80,8 @@
 		outline: none;
 
 		position: relative;
+
+		transition: all 0.2s ease-in-out;
 
 		@include hover {
 			background-color: lighten(#242223, 5%);

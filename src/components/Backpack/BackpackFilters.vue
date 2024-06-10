@@ -6,7 +6,10 @@
         :key="idx"
         class="filters__item"
       >
-        <button :class="['filters__btn', `filter__${item.name}`]">
+        <button
+          :class="['filters__btn', `filter__${item.name}`]"
+          @click.prevent="selectFilter(item.name)"
+        >
           {{ item.name }}
         </button>
       </li>
@@ -15,28 +18,28 @@
 </template>
 
 <script>
+// import axios from 'axios';
+// import { defineComponent } from 'vue';
+
 export default {
-  setup() {
+emits: ['filter-selected'],
+  setup(_, { emit }) {
     const filters = [
-      {
-        name: "all",
-      },
-      {
-        name: "armor",
-      },
-      {
-        name: "misc",
-      },
-      {
-        name: "weapons",
-      },
-      {
-        name: "trash",
-      },
+      { name: "all" },
+      { name: "armor" },
+      { name: "misc" },
+      { name: "weapons" },
+      { name: "trash" },
     ];
+
+    const selectFilter = (filterName) => {
+      // console.log('filter', filterName)
+      emit('filter-selected', filterName);
+    };
 
     return {
       filters,
+      selectFilter
     };
   },
 };

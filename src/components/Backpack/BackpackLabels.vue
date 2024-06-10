@@ -1,13 +1,26 @@
 <template>
   <div class="labels">
     <p class="labels__title">
-      All items
+      {{ selectedFilter === 'all' ? 'All items' : selectedFilter }}
     </p>
     <p class="labels__count">
       11/100
     </p>
   </div>
 </template>
+
+<script lang="ts">
+import { defineComponent } from 'vue';
+
+export default defineComponent({
+  props: {
+    selectedFilter: {
+      type: String,
+      required: true,
+    },
+  },
+});
+</script>
 
 <style lang="scss" scoped>
 .labels {

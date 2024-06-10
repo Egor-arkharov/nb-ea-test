@@ -8,13 +8,22 @@
 </template>
 
 <script>
+import { onMounted } from "vue";
+import { useStore } from "vuex";
 import NavMain from "@/components/NavMain";
 
 export default {
   components: {
     NavMain,
   },
-  setup() {},
+  setup() {
+    const store = useStore();
+
+    onMounted(async () => {
+			const data = await store.dispatch("loadData", 1);
+      console.log('app', data);
+		});
+  },
 };
 </script>
 
