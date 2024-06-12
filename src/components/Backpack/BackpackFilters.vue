@@ -7,7 +7,8 @@
         class="filters__item"
       >
         <button
-          :class="['filters__btn', `filter__${item.name}`]"
+          :class="['filters__btn', `filter__${item.name}`, { 'active': selectedFilter === item.name }]"
+          :title="item.name.charAt(0).toUpperCase() + item.name.slice(1)"
           @click.prevent="selectFilter(item.name)"
         >
           {{ item.name }}
@@ -18,27 +19,32 @@
 </template>
 
 <script>
-// import axios from 'axios';
-// import { defineComponent } from 'vue';
+import { useStore } from "vuex";
+import { computed } from "vue";
 
 export default {
 emits: ['filter-selected'],
   setup(_, { emit }) {
+		const store = useStore();
+    const selectedFilter = computed(() => store.getters.getFilter);
+
     const filters = [
       { name: "all" },
       { name: "armor" },
       { name: "misc" },
-      { name: "weapons" },
+      { name: "weapon" },
       { name: "trash" },
     ];
 
     const selectFilter = (filterName) => {
-      // console.log('filter', filterName)
+      selectedFilter.value = filterName;
+      store.commit('setFilter', filterName);
       emit('filter-selected', filterName);
     };
 
     return {
       filters,
+      selectedFilter,
       selectFilter
     };
   },
@@ -46,7 +52,7 @@ emits: ['filter-selected'],
 </script>
 
 <style lang="scss" scoped>
-$filters: all, armor, misc, weapons, trash;
+$filters: all, armor, misc, weapon, trash;
 
 .filters {
 	height: 100%;

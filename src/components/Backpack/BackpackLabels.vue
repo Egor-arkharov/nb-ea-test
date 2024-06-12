@@ -1,25 +1,45 @@
 <template>
   <div class="labels">
     <p class="labels__title">
-      {{ selectedFilter === 'all' ? 'All items' : selectedFilter }}
+      {{ selectedFilter }}
     </p>
     <p class="labels__count">
-      11/100
+      {{ filteredItemCount }}/{{ totalItemCount }}
     </p>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script>
+import { ref, computed, watch } from "vue";
+import { useStore } from "vuex";
 
-export default defineComponent({
-  props: {
-    selectedFilter: {
-      type: String,
-      required: true,
-    },
-  },
-});
+export default {
+  setup() {
+    const store = useStore();
+    const data = ref(store.getters.getData || []);
+    const selectedFilter = computed(() => store.getters.getFilter);
+
+    watch(
+      () => store.getters.getData,
+      (newValue) => {
+        data.value = newValue;
+      }
+    );
+
+    const filteredItemCount = computed(() => data.value.filter(item => selectedFilter.value === 'all' ? item : item.type === selectedFilter.value).length);
+    const totalItemCount = computed(() => data.value.length);
+
+    watch(() => store.getters.getData, (newValue) => {
+      data.value = newValue;
+    });
+
+    return { 
+      filteredItemCount, 
+      totalItemCount,
+      selectedFilter 
+    };
+  }
+};
 </script>
 
 <style lang="scss" scoped>
@@ -34,6 +54,7 @@ export default defineComponent({
 	&__title {
 		font-size: 20px;
 		text-transform: uppercase;
+    font-weight: 600;
 	}
 
 	&__count {

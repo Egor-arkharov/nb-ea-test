@@ -8,6 +8,12 @@
     </div>
     <div class="backpack__items">
       <BackpackItems :selected-filter="selectedFilter" />
+      <p
+        v-if="caseId < MIN_CASE_ID || caseId > MAX_CASE_ID"
+        class="error"
+      >
+        Invalid case ID. Case ID must be 3 or less. 
+      </p>
     </div>
   </div>
 </template>
@@ -17,6 +23,8 @@ import BackpackFilters from "../components/Backpack/BackpackFilters.vue";
 import BackpackLabels from "../components/Backpack/BackpackLabels.vue";
 import BackpackItems from "../components/Backpack/BackpackItems.vue";
 import { ref } from 'vue';
+import { useStore } from "vuex";
+import { MIN_CASE_ID, MAX_CASE_ID } from "@/use/utils";
 
 export default {
   
@@ -26,7 +34,9 @@ export default {
     BackpackItems
   },
   setup() {
+    const store = useStore();
     const selectedFilter = ref('all');
+    const caseId = store.getters.getCase;
 
     const updateSelectedFilter = (filterName) => {
       selectedFilter.value = filterName;
@@ -34,7 +44,10 @@ export default {
 
     return {
       updateSelectedFilter,
-      selectedFilter
+      selectedFilter,
+      caseId,
+      MIN_CASE_ID,
+      MAX_CASE_ID
     }
   },
 };
@@ -60,10 +73,13 @@ export default {
 
 		&__labels {
       grid-area: labels;
+      height: var(--labels-h);
 		}
 
 		&__items {
       grid-area: items;
+      max-height: calc(var(--home-h) - var(--nav-h) - var(--labels-h) - 15px);
+      padding-right: 15px;
 		}
 }
 </style>

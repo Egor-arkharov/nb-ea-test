@@ -25,7 +25,7 @@
 <style lang="scss" scoped>
 .nav {
 	width: 100%;
-	height: 60px;
+	height: var(--nav-h);
 	display: flex;
 
 	&__list {
