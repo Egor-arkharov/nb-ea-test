@@ -1,16 +1,27 @@
 <template>
   <div class="items">
-    <ul class="items__list">
+    <div
+      v-if="isLoading"
+      class="loader"
+    >
+      Loading...
+    </div>
+    <ul
+      v-else
+      class="items__list"
+    >
       <li
         v-for="(item, index) in filteredData"
         :key="index"
         class="items__item"
-        :class="{ 
-          'item--weapon': item.type === 'weapon', 
+        :class="{
+          'item--weapon': item.type === 'weapon',
           'item--armor': item.type === 'armor',
           'item--cooldown': item.cooldownActive,
-          'item--cooldown-end': !item.cooldownActive && item.cooldown !== undefined
+          'item--cooldown-end':
+            !item.cooldownActive && item.cooldown !== undefined,
         }"
+        :data-item-id="item.id"
       >
         <div class="item__inner">
           <img
@@ -42,25 +53,53 @@
 </template>
 
 <script>
-import { ref, computed, watch } from "vue";
+import { nextTick, ref, computed, watch } from "vue";
 import { useStore } from "vuex";
+
+import tippy, { followCursor } from "tippy.js";
+import "tippy.js/dist/tippy.css";
 
 export default {
   setup() {
     const store = useStore();
-    const data = ref(store.getters.getData || []); 
+    const data = computed(() => store.getters.getData);
     const selectedFilter = computed(() => store.getters.getFilter);
+    const isLoading = ref(true);
 
-    watch(
-      () => store.getters.getData,
-      (newValue) => {
-        data.value = newValue;
+
+    watch(data, () => {
+      if (isLoading.value) {
+        console.log("hi??")
+
+        isLoading.value = false;
         initializeCooldowns();
+
+        nextTick(() => {
+          initializeTippy();
+        });
       }
-    );
+    });
+
+
+    const customTippyConfig = {
+      arrow: false,
+      followCursor: true,
+    };
+
+    const initializeTippy = () => {
+      tippy(".items__item", {
+        content(reference) {
+          const itemId = reference.dataset.itemId;
+          const item = data.value.find((item) => item.id === itemId);
+          return item ? item.name : "";
+        },
+        ...customTippyConfig,
+        plugins: [followCursor],
+      });
+    };
 
     const initializeCooldowns = () => {
-      data.value.forEach(item => {
+      data.value.forEach((item) => {
         if (item.cooldown) {
           item.remainingCooldown = getCooldownInSeconds(item.cooldown);
           item.cooldownActive = true;
@@ -89,10 +128,17 @@ export default {
       }, 1000);
     };
 
-    const filteredData = computed(() => data.value.filter(item => selectedFilter.value === 'all' ? item : item.type === selectedFilter.value));
+    const filteredData = computed(() =>
+      data.value.filter((item) =>
+        selectedFilter.value === "all"
+          ? item
+          : item.type === selectedFilter.value
+      )
+    );
 
     return {
       filteredData,
+      isLoading,
     };
   },
 };
@@ -106,26 +152,26 @@ export default {
   max-height: 100%;
 
   @supports selector(::-webkit-scrollbar) {
-			&::-webkit-scrollbar {
-				width: 4px;
-				border-radius: 10px;
-				background-color: #454545;
-			}
-	
-			&::-webkit-scrollbar-thumb {
-				border-radius: 10px;
-				background-color: $white-color;
+    &::-webkit-scrollbar {
+      width: 4px;
+      border-radius: 10px;
+      background-color: #454545;
+    }
 
-				@include hover {
-					background-color: rgba($white-color, 0.6);
-				}
-			}
-		}
+    &::-webkit-scrollbar-thumb {
+      border-radius: 10px;
+      background-color: $white-color;
 
-		@supports not selector(::-webkit-scrollbar) {
-			scrollbar-width: thin;
-			scrollbar-color: $white-color #454545;
-		}
+      @include hover {
+        background-color: rgba($white-color, 0.6);
+      }
+    }
+  }
+
+  @supports not selector(::-webkit-scrollbar) {
+    scrollbar-width: thin;
+    scrollbar-color: $white-color #454545;
+  }
 
   &__list {
     display: grid;

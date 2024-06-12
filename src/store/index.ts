@@ -11,7 +11,8 @@ export default createStore({
   state: {
     data: null, 
     filter: 'all',
-    caseId: 1
+    caseId: 1,
+    loading: true
   },
   getters: {
     getData(state) {
@@ -23,6 +24,9 @@ export default createStore({
     getCase(state) {
       return state.caseId;
     },
+    getLoading(state) {
+      return state.loading;
+    },
   },
   mutations: {
     setInventory(state, inventory) {
@@ -33,6 +37,9 @@ export default createStore({
     },
     setCase(state, caseId) {
       state.caseId = caseId;
+    },
+    setLoading(state, boolean) {
+      state.loading = boolean;
     },
   },
   actions: {
@@ -47,10 +54,12 @@ export default createStore({
         // console.log('store', inventory);
 
         commit('setInventory', inventory); 
+        commit('setLoading', false); 
 
         return inventory;
       } catch (error) {
         console.log('ERROR', error);
+        commit('setLoading', true); 
         throw error;
       }
 		},
