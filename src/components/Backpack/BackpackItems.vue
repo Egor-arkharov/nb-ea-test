@@ -42,19 +42,28 @@
           </p>
         </div>
         <p
-          v-if="item.cooldownActive"
+          v-if="item.remainingCooldown > 0"
           class="item__cooldown"
         >
           <span>{{ item.remainingCooldown }}s</span>
         </p>
+      </li>
+      <li
+        v-for="index in Math.max(0, 40 - filteredData.length)"
+        :key="'empty-' + index"
+        class="items__item items__item--empty"
+      >
+        <div class="item__inner" />
       </li>
     </ul>
   </div>
 </template>
 
 <script>
-import { nextTick, ref, computed, watch } from "vue";
+import { nextTick, ref, computed, onMounted, watch } from "vue";
+import { debounce } from "vue-debounce";
 import { useStore } from "vuex";
+import { ROWS, COLS } from "@/use/utils";
 
 import tippy, { followCursor } from "tippy.js";
 import "tippy.js/dist/tippy.css";
@@ -64,13 +73,36 @@ export default {
     const store = useStore();
     const data = computed(() => store.getters.getData);
     const selectedFilter = computed(() => store.getters.getFilter);
-    const isLoading = ref(true);
+    const isLoading = ref(!store.getters.getDataLoaded);
+    const tippyInstances = ref([]);
 
+    const filteredData = computed(() =>
+      data.value.filter((item) =>
+        selectedFilter.value === "all"
+          ? item
+          : item.type === selectedFilter.value
+      )
+    );
+
+    onMounted(() => {
+      if (data.value.length) {
+        initializeTippy();
+      }
+
+      updateSizes();
+      window.addEventListener("resize",	debounce(() => updateSizes(), 300));
+    })
+
+    const updateSizes = () => {
+      const container = document.querySelector('.items');
+      const containerH = container.getBoundingClientRect().height;
+
+      const size = containerH / (ROWS / COLS);
+      container.style.setProperty('--size', `${size}px`);
+    }
 
     watch(data, () => {
       if (isLoading.value) {
-        console.log("hi??")
-
         isLoading.value = false;
         initializeCooldowns();
 
@@ -80,6 +112,9 @@ export default {
       }
     });
 
+    watch(selectedFilter, () => {
+      initializeTippy();
+    });
 
     const customTippyConfig = {
       arrow: false,
@@ -87,26 +122,24 @@ export default {
     };
 
     const initializeTippy = () => {
-      tippy(".items__item", {
-        content(reference) {
-          const itemId = reference.dataset.itemId;
-          const item = data.value.find((item) => item.id === itemId);
-          return item ? item.name : "";
-        },
-        ...customTippyConfig,
-        plugins: [followCursor],
-      });
-    };
+      if (tippyInstances.value.length) {
+        tippyInstances.value.forEach((instance) => instance.destroy());
+        tippyInstances.value = [];
+      }
 
-    const initializeCooldowns = () => {
-      data.value.forEach((item) => {
-        if (item.cooldown) {
-          item.remainingCooldown = getCooldownInSeconds(item.cooldown);
-          item.cooldownActive = true;
-          startCooldownTimer(item);
-        } else {
-          item.cooldownActive = false;
-        }
+      nextTick(() => {
+        const instances = tippy(".items__item:not(.items__item--empty)", {
+          content(reference) {
+            const itemId = reference.dataset.itemId;
+            const item = filteredData.value.find((item) => item.id === itemId);
+
+            return item ? item.name : "";
+          },
+          ...customTippyConfig,
+          plugins: [followCursor],
+        });
+
+        tippyInstances.value = instances;
       });
     };
 
@@ -116,25 +149,18 @@ export default {
       return Math.floor(remainingTime / 1000);
     };
 
-    const startCooldownTimer = (item) => {
-      const timer = setInterval(() => {
-        if (item.remainingCooldown > 0) {
-          item.remainingCooldown--;
+    const initializeCooldowns = () => {
+      data.value.forEach((item) => {
+        if (item.cooldown) {
+          item.remainingCooldown = getCooldownInSeconds(item.cooldown);
+          store.commit("setCooldown", item);
+          item.cooldownActive = true;
+          store.dispatch("startCooldownTimer", item.id);
         } else {
           item.cooldownActive = false;
-          clearInterval(timer);
-          item.cooldownEnded = true;
         }
-      }, 1000);
+      });
     };
-
-    const filteredData = computed(() =>
-      data.value.filter((item) =>
-        selectedFilter.value === "all"
-          ? item
-          : item.type === selectedFilter.value
-      )
-    );
 
     return {
       filteredData,
@@ -146,10 +172,12 @@ export default {
 
 <style lang="scss" scoped>
 .items {
-  --size: 85px;
+  --size: 75px;
+  --cols: 5;
 
   overflow: auto;
   max-height: 100%;
+  padding-right: 1vw;
 
   @supports selector(::-webkit-scrollbar) {
     &::-webkit-scrollbar {
@@ -175,7 +203,7 @@ export default {
 
   &__list {
     display: grid;
-    grid-template-columns: repeat(5, var(--size));
+    grid-template-columns: repeat(var(--cols), var(--size));
     grid-auto-rows: var(--size);
     gap: 0;
   }

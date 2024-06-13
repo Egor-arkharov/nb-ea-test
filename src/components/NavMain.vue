@@ -52,7 +52,8 @@
 		margin: 0;
 		padding: 10px 20px;
 
-		font-size: 24px;
+		font-size: clamp(18px, 3vw, 24px);
+
 		line-height: 1;
 
 		color: $white-color;

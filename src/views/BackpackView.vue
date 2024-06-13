@@ -1,13 +1,13 @@
 <template>
   <div class="backpack">
     <div class="backpack__filters">
-      <BackpackFilters @filter-selected="updateSelectedFilter" />
+      <BackpackFilters />
     </div>
     <div class="backpack__labels">
-      <BackpackLabels :selected-filter="selectedFilter" />
+      <BackpackLabels />
     </div>
     <div class="backpack__items">
-      <BackpackItems :selected-filter="selectedFilter" />
+      <BackpackItems />
       <p
         v-if="caseId < MIN_CASE_ID || caseId > MAX_CASE_ID"
         class="error"
@@ -22,7 +22,6 @@
 import BackpackFilters from "../components/Backpack/BackpackFilters.vue";
 import BackpackLabels from "../components/Backpack/BackpackLabels.vue";
 import BackpackItems from "../components/Backpack/BackpackItems.vue";
-import { ref } from 'vue';
 import { useStore } from "vuex";
 import { MIN_CASE_ID, MAX_CASE_ID } from "@/use/utils";
 
@@ -35,16 +34,9 @@ export default {
   },
   setup() {
     const store = useStore();
-    const selectedFilter = ref('all');
     const caseId = store.getters.getCase;
 
-    const updateSelectedFilter = (filterName) => {
-      selectedFilter.value = filterName;
-    };
-
     return {
-      updateSelectedFilter,
-      selectedFilter,
       caseId,
       MIN_CASE_ID,
       MAX_CASE_ID
@@ -79,7 +71,10 @@ export default {
 		&__items {
       grid-area: items;
       max-height: calc(var(--home-h) - var(--nav-h) - var(--labels-h) - 15px);
-      padding-right: 15px;
+      padding-right: 1vw;
+
+      display: flex;
+      justify-content: center;
 		}
 }
 </style>

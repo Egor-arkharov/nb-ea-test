@@ -6,11 +6,10 @@ module.exports = {
   extends: [
     'plugin:vue/vue3-recommended',
     'eslint:recommended',
+    '@vue/typescript/recommended',
   ],
   parserOptions: {
-    // parser: 'babel-eslint',
   },
   rules: {
-		// "prettier/prettier": ["error", { useTabs: true, endOfLine: "auto" }],
   },
 };

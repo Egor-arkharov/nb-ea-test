@@ -9,14 +9,14 @@
   </main>
 </template>
 
-<script>
-import { watch } from "vue";
+<script lang="ts">
+import { defineComponent, watch } from "vue";
 import { useStore } from "vuex";
-import { useRoute } from "vue-router";
-import NavMain from "@/components/NavMain";
+import { useRoute, RouteLocationNormalized } from "vue-router";
+import NavMain from "./components/NavMain.vue";
 import { MIN_CASE_ID, MAX_CASE_ID } from "@/use/utils";
 
-export default {
+export default defineComponent({
   components: {
     NavMain,
   },
@@ -24,30 +24,36 @@ export default {
     const store = useStore();
     const route = useRoute();
 
-    const fetchData = async (caseId) => {
+    const fetchData = async (caseId: number) => {
       try {
-        await store.dispatch("loadData", caseId);
-      } catch (error) {
+        if (!store.getters.getDataLoaded) {
+          await store.dispatch("loadData", caseId);
+        }
+      } catch (error: unknown) {
         console.error("Error loading data:", error);
       }
     };
 
-    watch(route, (newRoute) => {
-      const caseId = newRoute.query.case || 1;
-      store.commit('setCase', caseId);
-      if (caseId < MIN_CASE_ID || caseId > MAX_CASE_ID) {
-        console.error("Invalid case ID. Case ID must be 3 or less.");
-        return;
+    watch<RouteLocationNormalized>(route, (newRoute) => {
+      if (!store.getters.getDataLoaded) {
+        const caseId = Number(newRoute.query.case) || store.getters.getCase as number;
+        store.commit('setCase', caseId);
+        if (isNaN(caseId) || caseId < MIN_CASE_ID || caseId > MAX_CASE_ID) {
+          console.error("Invalid case ID. Case ID must be between 1 and 3.");
+          return;
+        }
+        fetchData(caseId);
       }
-      fetchData(caseId);
     });
   },
-};
+});
 </script>
+
 
 <style lang="scss" scoped>
 .home {
-  width: 562px;
+  min-width: 320px;
+  max-width: 562px;
   height: 80svh;
 
   background-color: $black-color;

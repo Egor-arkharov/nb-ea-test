@@ -37,7 +37,6 @@ emits: ['filter-selected'],
     ];
 
     const selectFilter = (filterName) => {
-      selectedFilter.value = filterName;
       store.commit('setFilter', filterName);
       emit('filter-selected', filterName);
     };

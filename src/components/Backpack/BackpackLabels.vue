@@ -52,13 +52,13 @@ export default {
 	padding-right: 10px;
 
 	&__title {
-		font-size: 20px;
+		font-size: clamp(14px, 3vw, 20px);
 		text-transform: uppercase;
     font-weight: 600;
 	}
 
 	&__count {
-		font-size: 18px;
+		font-size: clamp(12px, 3vw, 18px);
 	}
 }
 </style>
